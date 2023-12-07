@@ -4,7 +4,7 @@
 
 #include "Abilities/GameplayAbility.h"
 
-#include "GACGameplayAbility.generated.h"
+#include "GAEGameplayAbility.generated.h"
 
 class UAbilityCost;
 class APlayerController;
@@ -30,33 +30,25 @@ enum class EAbilityActivationMethod : uint8
 
 
 /**
- * Type of how the same AbilityGroupTags responds to the activation of the set Ability
- */
-UENUM(BlueprintType)
-enum class EAbilityActivationPolicy : uint8
-{
-	Independent,	// Does nothing for activation of other abilities
-
-	Replaceable,	// End this Ability when an Ability with the same AbilityGroupTags is activated.
-
-	Blocking,		// Block activation of abilities with the same AbilityGroupTags
-};
-
-
-/**
  * GameplayAbility with enhanced availability activation and other features
  */
 UCLASS(Abstract, HideCategories = "Input")
-class GACORE_API UGACGameplayAbility : public UGameplayAbility
+class GAEXT_API UGAEGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
-	friend class UGACAbilitySystemComponent;
+	friend class UGAEAbilitySystemComponent;
 
 public:
-	UGACGameplayAbility(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UGAEGameplayAbility(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
+	//
+	// Determine under what situation an ability will be activated or deactivated
+	//
+	UPROPERTY(EditDefaultsOnly, Category = "Ability Activation")
+	EAbilityActivationMethod ActivationMethod{ EAbilityActivationMethod::OnInputTriggered };
+
 	//
 	// Additional costs that must be paid to activate this ability
 	//
@@ -65,7 +57,6 @@ protected:
 
 protected:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
-	virtual void SetCanBeCanceled(bool bCanBeCanceled) override;
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
@@ -90,44 +81,11 @@ protected:
 	virtual void OnAbilityRemoved_Implementation() {}
 
 	/** 
-	 * Called when the ability system is initialized with a pawn avatar. 
+	 * Called when the ability system is initialized with a avatar. 
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Ability")
-	void OnPawnAvatarSet();
-	virtual void OnAbilityRemoved_Implementation() {}
-
-
-protected:
-	//
-	// Determine under what situation an ability will be activated or deactivated
-	//
-	UPROPERTY(EditDefaultsOnly, Category = "Ability Activation")
-	EAbilityActivationMethod ActivationMethod{ EAbilityActivationMethod::OnInputTriggered };
-
-	//
-	// Determine activation and deactivation policy for abilities that have the same AbilityGroupTag
-	//
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ability Activation")
-	EAbilityActivationPolicy ActivationPolicy{ EAbilityActivationPolicy::Independent };
-
-	//
-	// Ability group to which this ability belongs
-	//
-	UPROPERTY(EditDefaultsOnly, Category = "Tags", meta = (Categories = "Ability.Group"))
-	FGameplayTagContainer AbilityGroupTags;
-
-protected:
-	/**
-	 * Returns true if the requested activation policy is a valid transition.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Ability", Meta = (ExpandBoolAsExecs = "ReturnValue"))
-	bool CanChangeActivationGroup(EAbilityActivationPolicy NewPolicy) const;
-
-	/**
-	 * Tries to change the activation policy.  Returns true if it successfully changed.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Ability", Meta = (ExpandBoolAsExecs = "ReturnValue"))
-	bool ChangeActivationGroup(EAbilityActivationPolicy NewPolicy);
+	void OnAvatarSet();
+	virtual void OnAvatarSet_Implementation() {}
 
 
 protected:
@@ -162,7 +120,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
 	UAbilitySystemComponent* GetAbilitySystemComponent(TSubclassOf<UAbilitySystemComponent> Class) const;
 
-	template<typename T = UGACAbilitySystemComponent>
+	template<typename T = UGAEAbilitySystemComponent>
 	T* GetAbilitySystemComponent() const
 	{
 		return Cast<T>(GetAbilitySystemComponent(T::StaticClass()));

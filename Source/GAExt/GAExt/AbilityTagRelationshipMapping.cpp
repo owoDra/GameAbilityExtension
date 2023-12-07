@@ -5,7 +5,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AbilityTagRelationshipMapping)
 
 
-UAbilityTagRelationshipMapping::UAbilityTagRelationshipMapping(const FObjectInitializer& ObjectInitializer
+UAbilityTagRelationshipMapping::UAbilityTagRelationshipMapping(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }

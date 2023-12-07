@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class GACore : ModuleRules
+public class GAExt : ModuleRules
 {
-	public GACore(ReadOnlyTargetRules Target) : base(Target)
+	public GAExt(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -12,7 +12,7 @@ public class GACore : ModuleRules
             new string[]
             {
                 ModuleDirectory,
-                ModuleDirectory + "/GACore",
+                ModuleDirectory + "/GAExt",
             }
         );
 
@@ -34,6 +34,7 @@ public class GACore : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "GFCore",
             }
         );
 

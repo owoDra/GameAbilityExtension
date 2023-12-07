@@ -11,7 +11,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Cooldown		, "Ability.ActivateFai
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsBlocked		, "Ability.ActivateFail.TagsBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsMissing		, "Ability.ActivateFail.TagsMissing");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Networking		, "Ability.ActivateFail.Networking");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_ActivationGroup	, "Ability.ActivateFail.ActivationGroup");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Cost			, "Ability.ActivateFail.Cost");
 
 ///////////////////////////////////////////////////////
@@ -25,7 +24,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Weapon					, "Ability.Type.Weapon");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_StatusChange			, "Ability.Type.StatusChange");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Misc					, "Ability.Type.Misc");
 
-///////////////////////////////////////////////////////
-// Ability.Group
+////////////////////////////////////
+// Flag
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Group						, "Ability.Group");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_AbilityInputBlocked				, "Flag.AbilityInputBlocked");

@@ -1,19 +1,20 @@
 // Copyright (C) 2023 owoDra
 
-#include "GACGameplayAbility.h"
+#include "GAEGameplayAbility.h"
 
-#include "GACAbilitySystemComponent.h"
+#include "GAEAbilitySystemComponent.h"
+#include "AbilityCost.h"
 #include "AbilityTags.h"
-#include "GACoreLogs.h"
+#include "GAExtLogs.h"
 
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemGlobals.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GACGameplayAbility)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GAEGameplayAbility)
 
 
-UGACGameplayAbility::UGACGameplayAbility(const FObjectInitializer& ObjectInitializer)
+UGAEGameplayAbility::UGAEGameplayAbility(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateNo;
@@ -23,7 +24,7 @@ UGACGameplayAbility::UGACGameplayAbility(const FObjectInitializer& ObjectInitial
 }
 
 
-bool UGACGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+bool UGAEGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!ActorInfo || !ActorInfo->AbilitySystemComponent.IsValid())
 	{
@@ -35,33 +36,10 @@ bool UGACGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Ha
 		return false;
 	}
 
-	if (auto* GACASC{ GetAbilitySystemComponent<UGACAbilitySystemComponent>() })
-	{
-		if (false)
-		{
-			if (OptionalRelevantTags)
-			{
-				OptionalRelevantTags->AddTag(TAG_Ability_ActivateFail_ActivationGroup);
-			}
-			return false;
-		}
-	}
-
 	return true;
 }
 
-void UGACGameplayAbility::SetCanBeCanceled(bool bCanBeCanceled)
-{
-	if (!bCanBeCanceled && (ActivationPolicy == EAbilityActivationPolicy::Replaceable))
-	{
-		UE_LOG(LogGAC, Error, TEXT("SetCanBeCanceled: Ability [%s] can not block canceling because its activation group is replaceable."), *GetNameSafe(this));
-		return;
-	}
-
-	Super::SetCanBeCanceled(bCanBeCanceled);
-}
-
-void UGACGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UGAEGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
@@ -70,14 +48,14 @@ void UGACGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorIn
 	TryActivateAbilityOnSpawn(ActorInfo, Spec);
 }
 
-void UGACGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UGAEGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	OnAbilityRemoved();
 
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
-bool UGACGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags) const
+bool UGAEGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags) || !ActorInfo)
 	{
@@ -100,7 +78,7 @@ bool UGACGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, con
 	return true;
 }
 
-void UGACGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
+void UGAEGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
 {
 	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
 
@@ -113,17 +91,17 @@ void UGACGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, con
 	}
 }
 
-FGameplayEffectContextHandle UGACGameplayAbility::MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const
+FGameplayEffectContextHandle UGAEGameplayAbility::MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const
 {
 	return Super::MakeEffectContext(Handle, ActorInfo);
 }
 
-void UGACGameplayAbility::ApplyAbilityTagsToGameplayEffectSpec(FGameplayEffectSpec& Spec, FGameplayAbilitySpec* AbilitySpec) const
+void UGAEGameplayAbility::ApplyAbilityTagsToGameplayEffectSpec(FGameplayEffectSpec& Spec, FGameplayAbilitySpec* AbilitySpec) const
 {
 	Super::ApplyAbilityTagsToGameplayEffectSpec(Spec, AbilitySpec);
 }
 
-bool UGACGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
+bool UGAEGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
 	// Specialized version to handle death exclusion and AbilityTags expansion via ASC
 
@@ -141,7 +119,6 @@ bool UGACGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySystem
 		bBlocked = true;
 	}
 
-	const auto* GACASC = Cast<UGACAbilitySystemComponent>(&AbilitySystemComponent);
 	static FGameplayTagContainer AllRequiredTags;
 	static FGameplayTagContainer AllBlockedTags;
 
@@ -150,9 +127,9 @@ bool UGACGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySystem
 
 	// Expand our ability tags to add additional required/blocked tags
 
-	if (GACASC)
+	if (const auto* GAEASC{ Cast<UGAEAbilitySystemComponent>(&AbilitySystemComponent) })
 	{
-		GACASC->GetAdditionalActivationTagRequirements(AbilityTags, AllRequiredTags, AllBlockedTags);
+		GAEASC->GetAdditionalActivationTagRequirements(AbilityTags, AllRequiredTags, AllBlockedTags);
 	}
 
 	// Check to see the required/blocked tags for this ability
@@ -224,50 +201,7 @@ bool UGACGameplayAbility::DoesAbilitySatisfyTagRequirements(const UAbilitySystem
 }
 
 
-bool UGACGameplayAbility::CanChangeActivationGroup(EAbilityActivationPolicy NewPolicy) const
-{
-	if (!IsInstantiated() || !IsActive())
-	{
-		return false;
-	}
-
-	if (ActivationPolicy == NewPolicy)
-	{
-		return true;
-	}
-
-	// This ability can't become replaceable if it can't be canceled.
-
-	if ((NewPolicy == EAbilityActivationPolicy::Replaceable) && !CanBeCanceled())
-	{
-		return false;
-	}
-
-	return true;
-}
-
-bool UGACGameplayAbility::ChangeActivationGroup(EAbilityActivationPolicy NewPolicy)
-{
-	if (!CanChangeActivationGroup(NewPolicy))
-	{
-		return false;
-	}
-
-	if (ActivationPolicy != NewPolicy)
-	{
-		if(auto* GACASC{ GetAbilitySystemComponent() })
-		{
-
-		}
-
-		ActivationPolicy = NewPolicy;
-	}
-
-	return true;
-}
-
-
-void UGACGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const
+void UGAEGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const
 {
 	const auto bIsPredicting{ Spec.ActivationInfo.ActivationMode == EGameplayAbilityActivationMode::Predicting };
 
@@ -297,17 +231,17 @@ void UGACGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorI
 }
 
 
-UAbilitySystemComponent* UGACGameplayAbility::GetAbilitySystemComponent(TSubclassOf<UAbilitySystemComponent> Class) const
+UAbilitySystemComponent* UGAEGameplayAbility::GetAbilitySystemComponent(TSubclassOf<UAbilitySystemComponent> Class) const
 {
 	return CurrentActorInfo ? CurrentActorInfo->AbilitySystemComponent.Get() : nullptr;
 }
 
-APlayerController* UGACGameplayAbility::GetPlayerController(TSubclassOf<APlayerController> Class) const
+APlayerController* UGAEGameplayAbility::GetPlayerController(TSubclassOf<APlayerController> Class) const
 {
 	return CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr;
 }
 
-AController* UGACGameplayAbility::GetController(TSubclassOf<AController> Class) const
+AController* UGAEGameplayAbility::GetController(TSubclassOf<AController> Class) const
 {
 	if (CurrentActorInfo)
 	{
@@ -336,17 +270,17 @@ AController* UGACGameplayAbility::GetController(TSubclassOf<AController> Class) 
 	return nullptr;
 }
 
-ACharacter* UGACGameplayAbility::GetCharacter(TSubclassOf<ACharacter> Class) const
+ACharacter* UGAEGameplayAbility::GetCharacter(TSubclassOf<ACharacter> Class) const
 {
 	return CurrentActorInfo ? Cast<ACharacter>(CurrentActorInfo->AvatarActor.Get()) : nullptr;
 }
 
-APawn* UGACGameplayAbility::GetPawn(TSubclassOf<APawn> Class) const
+APawn* UGAEGameplayAbility::GetPawn(TSubclassOf<APawn> Class) const
 {
 	return CurrentActorInfo ? Cast<APawn>(CurrentActorInfo->AvatarActor.Get()) : nullptr;
 }
 
-AActor* UGACGameplayAbility::GetActor(TSubclassOf<AActor> Class) const
+AActor* UGAEGameplayAbility::GetActor(TSubclassOf<AActor> Class) const
 {
 	return CurrentActorInfo ? CurrentActorInfo->AvatarActor.Get() : nullptr;
 }

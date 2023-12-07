@@ -7,7 +7,7 @@
 /**
  *  Modules for the main features of the GameAbilityCore plugin
  */
-class FGACoreModule : public IModuleInterface
+class FGAExtModule : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
