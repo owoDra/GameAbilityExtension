@@ -180,6 +180,7 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 
 void UGAEAbilitySystemComponent::HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState)
 {
+	UE_LOG(LogGAE, Log, TEXT("[ASC] InitState: Current(%s), Desired(%s)"), *CurrentState.GetTagName().ToString(), *DesiredState.GetTagName().ToString());
 }
 
 void UGAEAbilitySystemComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)

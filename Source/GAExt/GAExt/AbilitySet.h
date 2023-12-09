@@ -71,7 +71,7 @@ public:
  * Data used to store handles to what has been granted by the ability set.
  */
 USTRUCT(BlueprintType)
-struct FAbilitySet_GrantedHandles
+struct GAEXT_API FAbilitySet_GrantedHandles
 {
 	GENERATED_BODY()
 protected:
@@ -98,7 +98,7 @@ public:
  * Non-mutable data asset used to grant gameplay abilities and gameplay effects.
  */
 UCLASS(BlueprintType, Const)
-class UAbilitySet : public UPrimaryDataAsset
+class GAEXT_API UAbilitySet : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 public:

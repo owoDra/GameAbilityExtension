@@ -23,19 +23,19 @@ public:
 	//
 	// The tag that this container relationship is about. Single tag, but abilities can have multiple of these
 	//
-	UPROPERTY(EditAnywhere, meta = (Categories = "Ability.Type.Action"))
+	UPROPERTY(EditAnywhere, meta = (Categories = "Ability.Type"))
 	FGameplayTag AbilityTag;
 
 	//
 	// The other ability tags that will be blocked by any ability using this tag
 	//
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (Categories = "Ability.Type"))
 	FGameplayTagContainer AbilityTagsToBlock;
 
 	//
 	// The other ability tags that will be canceled by any ability using this tag
 	//
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (Categories = "Ability.Type"))
 	FGameplayTagContainer AbilityTagsToCancel;
 
 	//
