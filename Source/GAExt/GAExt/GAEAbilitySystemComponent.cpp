@@ -7,7 +7,7 @@
 #include "GlobalAbilitySubsystem.h"
 #include "GAExtLogs.h"
 
-#include "InitStateTags.h"
+#include "InitState/InitStateTags.h"
 
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/Actor.h"
@@ -127,7 +127,6 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 
 	/**
 	 * [None] -> [Spawned]
-	 *
 	 */
 	if (!CurrentState.IsValid() && DesiredState == TAG_InitState_Spawned)
 	{
@@ -141,15 +140,8 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 
 	/**
 	 * [Spawned] -> [DataAvailable]
-	 *
-	 * Tips:
-	 *	At any time that the current state is valid (Spawned or later),
-	 *	an attempt can be made to move to this state.
-	 *
-	 *  When avarat actor changed,
-	 *	it is moved to this state to reset the initialization state.
 	 */
-	if (CurrentState.IsValid() && DesiredState == TAG_InitState_DataAvailable)
+	if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
 	{
 		// Check Avatar/Owner Actor
 
@@ -180,7 +172,8 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 
 void UGAEAbilitySystemComponent::HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState)
 {
-	UE_LOG(LogGAE, Log, TEXT("[ASC] InitState: Current(%s), Desired(%s)"), *CurrentState.GetTagName().ToString(), *DesiredState.GetTagName().ToString());
+	UE_LOG(LogGAE, Log, TEXT("[%s] Ability System Component InitState Reached: %s"),
+		GetOwner()->HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *DesiredState.GetTagName().ToString());
 }
 
 void UGAEAbilitySystemComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)

@@ -6,6 +6,8 @@
 
 #include "GAEAttributeSet.generated.h"
 
+struct FGameplayEffectSpec;
+
 
 /**
  * This macro defines a set of helper functions for accessing and initializing attributes.
@@ -29,7 +31,7 @@
 /**
  * Delegate used to broadcast attribute events.
  */
-DECLARE_MULTICAST_DELEGATE_FourParams(FBEAttributeEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayEffectSpec& /*EffectSpec*/, float /*EffectMagnitude*/);
+DECLARE_MULTICAST_DELEGATE_FourParams(FAttributeEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayEffectSpec& /*EffectSpec*/, float /*EffectMagnitude*/);
 
 
 /**
