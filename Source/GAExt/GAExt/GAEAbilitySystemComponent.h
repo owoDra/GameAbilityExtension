@@ -20,7 +20,7 @@ class UAbilityTagRelationshipMapping;
  *	When using this AbilitySystemCompoenent, it is recommended to create abilities that inherit from GAEGameplayAbility instead of the GameplayAbility.
  *  Derivation from GameplayAbility will not allow you to take full advantage of its features.
  */
-UCLASS()
+UCLASS(meta = (BlueprintSpawnableComponent))
 class GAEXT_API UGAEAbilitySystemComponent : public UAbilitySystemComponent, public IGameFrameworkInitStateInterface
 {
 	GENERATED_BODY()
