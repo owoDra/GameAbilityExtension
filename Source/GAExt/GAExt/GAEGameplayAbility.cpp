@@ -43,16 +43,23 @@ void UGAEGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorIn
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
-	OnAbilityAdded();
+	BP_OnGiveAbility();
 
 	TryActivateAbilityOnSpawn(ActorInfo, Spec);
 }
 
 void UGAEGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	OnAbilityRemoved();
+	BP_OnRemoveAbility();
 
 	Super::OnRemoveAbility(ActorInfo, Spec);
+}
+
+void UGAEGameplayAbility::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	BP_OnAvatarSet();
+
+	Super::OnAvatarSet(ActorInfo, Spec);
 }
 
 bool UGAEGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags) const

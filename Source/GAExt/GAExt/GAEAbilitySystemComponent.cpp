@@ -79,31 +79,6 @@ void UGAEAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AAct
 
 	if (InAvatarActor && (InAvatarActor != ActorInfo->AvatarActor))
 	{
-		// Notify all abilities that a new avatar has been set
-
-		for (const auto& AbilitySpec : ActivatableAbilities.Items)
-		{
-			if (AbilitySpec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
-			{
-				auto Instances{ AbilitySpec.GetAbilityInstances() };
-
-				for (const auto& AbilityInstance : Instances)
-				{
-					if (auto* GAEAbilityInstance{ Cast<UGAEGameplayAbility>(AbilityInstance) })
-					{
-						GAEAbilityInstance->OnAvatarSet();
-					}
-				}
-			}
-			else
-			{
-				if (auto* GAEAbilityCDO{ Cast<UGAEGameplayAbility>(AbilitySpec.Ability) })
-				{
-					GAEAbilityCDO->OnAvatarSet();
-				}
-			}
-		}
-
 		// Register with the global system once we actually have a pawn avatar. 
 		// We wait until this time since some globally-applied effects may require an avatar.
 

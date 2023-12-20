@@ -59,6 +59,7 @@ protected:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	virtual void OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	virtual FGameplayEffectContextHandle MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const override;
@@ -69,23 +70,20 @@ protected:
 	/** 
 	 * Called when this ability is granted to the ability system component. 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "Ability")
-	void OnAbilityAdded();
-	virtual void OnAbilityAdded_Implementation() {}
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ability", meta = (DisplayName = "OnGiveAbility"))
+	void BP_OnGiveAbility();
 
 	/** 
 	 * Called when this ability is removed from the ability system component. 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "Ability")
-	void OnAbilityRemoved();
-	virtual void OnAbilityRemoved_Implementation() {}
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ability", meta = (DisplayName = "OnRemoveAbility"))
+	void BP_OnRemoveAbility();
 
 	/** 
 	 * Called when the ability system is initialized with a avatar. 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "Ability")
-	void OnAvatarSet();
-	virtual void OnAvatarSet_Implementation() {}
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ability", meta = (DisplayName = "OnAvatarSet"))
+	void BP_OnAvatarSet();
 
 
 protected:
