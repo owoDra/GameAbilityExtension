@@ -111,6 +111,7 @@ protected:
 	virtual void AbilitySpecInputPressed(FGameplayAbilitySpec& Spec) override;
 	virtual void AbilitySpecInputReleased(FGameplayAbilitySpec& Spec) override;
 
+public:
 	/**
 	 * Mark the press and hold start of abilities according to the tag.
 	 */
@@ -121,7 +122,6 @@ protected:
 	 */
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
 
-public:
 	/**
 	 * Clear marked ability inputs.
 	 */
