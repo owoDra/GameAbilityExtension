@@ -7,10 +7,13 @@
 #include "GlobalAbilitySubsystem.h"
 #include "GAExtLogs.h"
 
+#include "GFCPlayerController.h"
 #include "InitState/InitStateTags.h"
+#include "InitState/InitStateComponent.h"
 
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 #include "GameplayAbilitySpec.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GAEAbilitySystemComponent)
@@ -31,8 +34,8 @@ void UGAEAbilitySystemComponent::OnRegister()
 	// No more than two of these components should be added to a Pawn.
 
 	TArray<UActorComponent*> Components;
-	GetOwner()->GetComponents(UAbilitySystemComponent::StaticClass(), Components);
-	ensureAlwaysMsgf((Components.Num() == 1), TEXT("Only one AbilitySystemComponent should exist on [%s]."), *GetNameSafe(GetOwner()));
+	GetOwner()->GetComponents(StaticClass(), Components);
+	ensureAlwaysMsgf((Components.Num() == 1), TEXT("Only one [%s] should exist on [%s]."), *GetNameSafe(StaticClass()), *GetNameSafe(GetOwner()));
 
 	// Register this component in the GameFrameworkComponentManager.
 
@@ -69,12 +72,15 @@ void UGAEAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	Super::EndPlay(EndPlayReason);
 }
 
+
 void UGAEAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor)
 {
+	check(InOwnerActor);
+	check(InAvatarActor);
+
 	auto* ActorInfo{ AbilityActorInfo.Get() };
 	check(ActorInfo);
-	check(InOwnerActor);
-
+	
 	Super::InitAbilityActorInfo(InOwnerActor, InAvatarActor);
 
 	if (InAvatarActor && (InAvatarActor != ActorInfo->AvatarActor))
@@ -118,6 +124,11 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 	 */
 	if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
 	{
+		if (!Manager->HasFeatureReachedInitState(GetOwner(), UInitStateComponent::NAME_ActorFeatureName, TAG_InitState_DataAvailable))
+		{
+			return false;
+		}
+
 		// Check Avatar/Owner Actor
 
 		if (GetAvatarActor() && GetOwnerActor())
@@ -153,6 +164,13 @@ void UGAEAbilitySystemComponent::HandleChangeInitState(UGameFrameworkComponentMa
 
 void UGAEAbilitySystemComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)
 {
+	if (Params.FeatureName == UInitStateComponent::NAME_ActorFeatureName)
+	{
+		if (Params.FeatureState == TAG_InitState_DataAvailable)
+		{
+			CheckDefaultInitialization();
+		}
+	}
 }
 
 void UGAEAbilitySystemComponent::CheckDefaultInitialization()
