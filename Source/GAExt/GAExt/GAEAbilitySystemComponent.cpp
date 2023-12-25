@@ -7,7 +7,7 @@
 #include "GlobalAbilitySubsystem.h"
 #include "GAExtLogs.h"
 
-#include "GFCPlayerController.h"
+#include "Actor/GFCPlayerController.h"
 #include "InitState/InitStateTags.h"
 #include "InitState/InitStateComponent.h"
 
@@ -20,6 +20,8 @@
 
 
 const FName UGAEAbilitySystemComponent::NAME_ActorFeatureName("AbilitySystem");
+
+const FName UGAEAbilitySystemComponent::NAME_AbilityReady("AbilityReady");
 
 UGAEAbilitySystemComponent::UGAEAbilitySystemComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -122,7 +124,7 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 	/**
 	 * [Spawned] -> [DataAvailable]
 	 */
-	if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
+	else if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
 	{
 		if (!Manager->HasFeatureReachedInitState(GetOwner(), UInitStateComponent::NAME_ActorFeatureName, TAG_InitState_DataAvailable))
 		{
@@ -160,6 +162,14 @@ void UGAEAbilitySystemComponent::HandleChangeInitState(UGameFrameworkComponentMa
 {
 	UE_LOG(LogGAE, Log, TEXT("[%s] Ability System Component InitState Reached: %s"),
 		GetOwner()->HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *DesiredState.GetTagName().ToString());
+
+	/**
+	 * [Spawned] -> [DataAvailable]
+	 */
+	if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
+	{
+		UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(GetOwnerActor(), NAME_AbilityReady);
+	}
 }
 
 void UGAEAbilitySystemComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)

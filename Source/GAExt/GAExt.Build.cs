@@ -27,6 +27,8 @@ public class GAExt : ModuleRules
                 "GameplayTags",
                 "GameplayTasks",
                 "GameplayAbilities",
+                "GameFeatures",
+                "DeveloperSettings",
             }
         );
 
