@@ -12,7 +12,7 @@ class UGameFeatureData;
 /**
  * Observe the addition and deletion of GameplayCuePath by registering and unregistering GmeFeatures
  */
-UCLASS()
+UCLASS(meta = (DisplayName = "Observer GameplayCue Path"))
 class UGameFeatureObserver_AddGameplayCuePath : public UObject, public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
