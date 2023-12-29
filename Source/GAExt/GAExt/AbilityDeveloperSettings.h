@@ -28,7 +28,7 @@ enum class EGameplayCueEditorLoadMode : uint8
 /**
  * Settings for a Game framework.
  */
-UCLASS(config=Game, defaultconfig, meta=(DisplayName="Game Ability Settings"))
+UCLASS(Config = "Game", Defaultconfig, meta = (DisplayName = "Game Ability Extension"))
 class UAbilityDeveloperSettings : public UDeveloperSettings
 {
 public:

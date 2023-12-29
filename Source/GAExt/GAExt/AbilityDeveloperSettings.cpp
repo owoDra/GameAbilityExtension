@@ -7,5 +7,6 @@
 
 UAbilityDeveloperSettings::UAbilityDeveloperSettings()
 {
-	CategoryName = TEXT("Game Ability Extension");
+	CategoryName = TEXT("Game XXX Extension");
+	SectionName = TEXT("Game Ability Extension");
 }
