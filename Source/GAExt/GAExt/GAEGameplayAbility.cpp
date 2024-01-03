@@ -1,11 +1,15 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #include "GAEGameplayAbility.h"
 
 #include "GAEAbilitySystemComponent.h"
 #include "AbilityCost.h"
-#include "AbilityTags.h"
+#include "GameplayTag/GAETags_Ability.h"
+#include "GameplayTag/GAETags_Message.h"
+#include "Type/AbilityFailureMessageTypes.h"
 #include "GAExtLogs.h"
+
+#include "Message/GameplayMessageSubsystem.h"
 
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
@@ -238,9 +242,71 @@ void UGAEGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorI
 }
 
 
+void UGAEGameplayAbility::OnAbilityFailedToActivate_Implementation(const FGameplayTagContainer& FailedReason) const
+{
+	auto bFailureMessageFound{ false };
+	auto bFailureMontageFound{ false };
+
+	for (const auto& Reason : FailedReason)
+	{
+		if (!bFailureMessageFound)
+		{
+			if (const auto* FoundMessage{ FailureTagToUserFacingMessages.Find(Reason) })
+			{
+				FAbilityFailureMessage Message;
+				Message.PlayerController = GetActorInfo().PlayerController.Get();
+				Message.FailureTags = FailedReason;
+				Message.UserFacingReason = *FoundMessage;
+
+				auto& MessageSubsystem{ UGameplayMessageSubsystem::Get(GetWorld()) };
+				MessageSubsystem.BroadcastMessage(TAG_Message_Ability_ActivateFail_UserFacingMessage, Message);
+
+				bFailureMessageFound = true;
+			}
+		}
+
+		if (!bFailureMontageFound)
+		{
+			if (auto FoundMontage{ FailureTagToAnimMontage.FindRef(Reason) })
+			{
+				FAbilityFailureMontageMessage Message;
+				Message.PlayerController = GetActorInfo().PlayerController.Get();
+				Message.FailureTags = FailedReason;
+				Message.FailureMontage = FoundMontage;
+
+				auto& MessageSubsystem{ UGameplayMessageSubsystem::Get(GetWorld()) };
+				MessageSubsystem.BroadcastMessage(TAG_Message_Ability_ActivateFail_PlayMontage, Message);
+
+				bFailureMontageFound = true;
+			}
+		}
+
+		if (bFailureMessageFound && bFailureMontageFound)
+		{
+			return;
+		}
+	}
+}
+
+
 UAbilitySystemComponent* UGAEGameplayAbility::GetAbilitySystemComponent(TSubclassOf<UAbilitySystemComponent> Class) const
 {
 	return CurrentActorInfo ? CurrentActorInfo->AbilitySystemComponent.Get() : nullptr;
+}
+
+UMovementComponent* UGAEGameplayAbility::GetMovementComponent(TSubclassOf<UMovementComponent> Class) const
+{
+	return CurrentActorInfo ? CurrentActorInfo->MovementComponent.Get() : nullptr;
+}
+
+USkeletalMeshComponent* UGAEGameplayAbility::GetSkeletalMeshComponent(TSubclassOf<USkeletalMeshComponent> Class) const
+{
+	return CurrentActorInfo ? CurrentActorInfo->SkeletalMeshComponent.Get() : nullptr;
+}
+
+UAnimInstance* UGAEGameplayAbility::GetAnimInstance(TSubclassOf<UAnimInstance> Class) const
+{
+	return CurrentActorInfo ? CurrentActorInfo->AnimInstance.Get() : nullptr;
 }
 
 APlayerController* UGAEGameplayAbility::GetPlayerController(TSubclassOf<APlayerController> Class) const

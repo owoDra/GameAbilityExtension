@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #pragma once
 
@@ -25,8 +25,3 @@ GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Skill);
 GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Weapon);
 GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_StatusChange);
 GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Misc);
-
-////////////////////////////////////
-// Flag
-
-GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Flag_AbilityInputBlocked);

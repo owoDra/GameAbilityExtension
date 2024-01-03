@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #pragma once
 
@@ -6,6 +6,7 @@
 
 #include "GAEGameplayAbility.generated.h"
 
+class UGAEAbilitySystemComponent;
 class UAbilityCost;
 class APlayerController;
 class AController;
@@ -111,7 +112,7 @@ protected:
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category = "Ability")
 	void OnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const;
-	virtual void OnAbilityFailedToActivate_Implementation(const FGameplayTagContainer& FailedReason) const {}
+	virtual void OnAbilityFailedToActivate_Implementation(const FGameplayTagContainer& FailedReason) const;
 
 
 public:
@@ -122,6 +123,33 @@ public:
 	T* GetAbilitySystemComponent() const
 	{
 		return Cast<T>(GetAbilitySystemComponent(T::StaticClass()));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
+	UMovementComponent* GetMovementComponent(TSubclassOf<UMovementComponent> Class) const;
+
+	template<typename T = UMovementComponent>
+	T* GetMovementComponent() const
+	{
+		return Cast<T>(GetMovementComponent(T::StaticClass()));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
+	USkeletalMeshComponent* GetSkeletalMeshComponent(TSubclassOf<USkeletalMeshComponent> Class) const;
+
+	template<typename T = USkeletalMeshComponent>
+	T* GetSkeletalMeshComponent() const
+	{
+		return Cast<T>(GetSkeletalMeshComponent(T::StaticClass()));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
+	UAnimInstance* GetAnimInstance(TSubclassOf<UAnimInstance> Class) const;
+
+	template<typename T = UAnimInstance>
+	T* GetAnimInstance() const
+	{
+		return Cast<T>(GetAnimInstance(T::StaticClass()));
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))

@@ -1,6 +1,6 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
-#include "AbilityTags.h"
+#include "GAETags_Ability.h"
 
 
 ///////////////////////////////////////////////////////
@@ -23,8 +23,3 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Skill					, "Ability.Type.Skill");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Weapon					, "Ability.Type.Weapon");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_StatusChange			, "Ability.Type.StatusChange");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Misc					, "Ability.Type.Misc");
-
-////////////////////////////////////
-// Flag
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_AbilityInputBlocked				, "Flag.AbilityInputBlocked");

@@ -3,7 +3,8 @@
 #include "GAEAbilitySystemComponent.h"
 
 #include "AbilityTagRelationshipMapping.h"
-#include "AbilityTags.h"
+#include "GameplayTag/GAETags_Ability.h"
+#include "GameplayTag/GAETags_Flag.h"
 #include "GlobalAbilitySubsystem.h"
 #include "GAExtLogs.h"
 
