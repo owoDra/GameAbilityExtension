@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #pragma once
 
@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	int32 AbilityLevel{ 1 };
 
-	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "InputTag"))
+	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Input"))
 	FGameplayTag InputTag;
 
 };
