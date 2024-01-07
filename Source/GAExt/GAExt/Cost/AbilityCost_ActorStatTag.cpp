@@ -33,6 +33,13 @@ bool UAbilityCost_ActorStatTag::CheckCost(const UGAEGameplayAbility* Ability, co
 
 void UAbilityCost_ActorStatTag::ApplyCost(const UGAEGameplayAbility* Ability, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
+	// Must have authority
+
+	if (!ActorInfo->IsNetAuthority())
+	{
+		return;
+	}
+
 	auto* TargetActor{ (Target == EConsumeStatTarget::OwningActor) ? ActorInfo->OwnerActor.Get() : ActorInfo->AvatarActor.Get() };
 
 	if (auto* Interface{ Cast<IGameplayTagStackInterface>(TargetActor) })
