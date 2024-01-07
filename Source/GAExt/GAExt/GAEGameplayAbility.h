@@ -20,13 +20,42 @@ class AActor;
 UENUM(BlueprintType)
 enum class EAbilityActivationMethod : uint8
 {
-	OnInputTriggered,	// Activated when input is received
+	// Activated when input is received
+	OnInputTriggered,	
 
-	WhileInputActive,	// Activated when input is received and deactivated when input is lost
+	// Activated when input is received and deactivated when input is lost
+	WhileInputActive,	
 
-	OnSpawn,			// Activated when abilities are registered and created
+	// Activated when abilities are registered and created
+	OnSpawn,			
 
-	Custom				// Explicitly activated by special events
+	// Explicitly activated by special events
+	Custom				
+};
+
+
+/**
+ * Policy that can activate abilities
+ */
+UENUM(BlueprintType)
+enum class EAbilityActivationPolicy : uint8
+{
+	// Can be activated only when both cooldown and costs are ready
+	Default,			
+
+	// Can be activated ignoring cooldown if both costs are ready
+	// 
+	// Tips:
+	//	Can be used for abilities where stock is charged by cooldown
+	//
+	CostOverCooldown,	
+
+	// Can be activated ignoring cost if cooldown is both ready.
+	//
+	// Tips:
+	//	Can be used for abilities that can be used at the cost of something else when the cost is not enough
+	//
+	CooldownOverCost	
 };
 
 
@@ -39,35 +68,18 @@ class GAEXT_API UGAEGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 	friend class UGAEAbilitySystemComponent;
+	friend class UAbilityCost;
 
 public:
 	UGAEGameplayAbility(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
-	//
-	// Determine under what situation an ability will be activated or deactivated
-	//
-	UPROPERTY(EditDefaultsOnly, Category = "Ability Activation")
-	EAbilityActivationMethod ActivationMethod{ EAbilityActivationMethod::OnInputTriggered };
+	virtual bool CommitAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
 
-	//
-	// Additional costs that must be paid to activate this ability
-	//
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Costs")
-	TArray<TObjectPtr<UAbilityCost>> AdditionalCosts;
-
-protected:
-	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 	virtual void OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
-	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
-	virtual FGameplayEffectContextHandle MakeEffectContext(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo) const override;
-	virtual void ApplyAbilityTagsToGameplayEffectSpec(FGameplayEffectSpec& Spec, FGameplayAbilitySpec* AbilitySpec) const override;
-	virtual bool DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const override;
 
-protected:
 	/** 
 	 * Called when this ability is granted to the ability system component. 
 	 */
@@ -87,24 +99,144 @@ protected:
 	void BP_OnAvatarSet();
 
 
+	///////////////////////////////////////////////////////////////////////////////////
+	// Ability Activation
+#pragma region Ability Activation
+protected:
+	//
+	// Determine under what situation an ability will be activated or deactivated
+	//
+	UPROPERTY(EditDefaultsOnly, Category = "Ability Activation")
+	EAbilityActivationMethod ActivationMethod{ EAbilityActivationMethod::OnInputTriggered };
+
+	//
+	// Determine policy that can activate abilities
+	//
+	UPROPERTY(EditDefaultsOnly, Category = "Ability Activation")
+	EAbilityActivationPolicy ActivationPolicy{ EAbilityActivationPolicy::Default };
+
+public:
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	virtual bool DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const override;
+
+	/**
+	 * Runs when this ability is created and try to activate the ability
+	 */
+	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
+
+#pragma endregion
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// Cooldowns
+#pragma region Cooldowns
+protected:
+	//
+	// Override the effect time of CooldownGameplayEffect.
+	// 
+	// Note:
+	//	If the class is not the default GameplayEffect class, it may not be available in some settings.
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (ClampMin = 0.00))
+	float CooltimeOverride{ 0.0f };
+
+	//
+	// Tag to identify cooldown GE
+	// 
+	// Note:
+	//	If not set, cooldown is not executed
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (Categories = "Ability.Cooldown"))
+	FGameplayTag CooldownTag;
+
+	//
+	// Tag to be used when sending cooldown messages
+	// 
+	// Tips:
+	//	If not set, no message will be sent
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (Categories = "Message.Ability.Cooldown"))
+	FGameplayTag CooldownMessageTag;
+
+	//
+	// Whether to listen for end of cooldown
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns")
+	bool bShouldListenToCooldownEnd{ false };
+
+protected:
+	UPROPERTY(Transient)
+	mutable FGameplayTagContainer CooldownGETags;
+
+public:
+	virtual bool CommitAbilityCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const bool ForceCooldown, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
+
+	virtual bool CheckCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+
+	virtual const FGameplayTagContainer* GetCooldownTags() const override;
+
+protected:
+	/**
+	 * Returns whether Cooldown is available in the current configuration
+	 */
+	virtual bool IsCooldownAvailable() const;
+
+	/**
+	 * Broadcast the start and end of a Cooldown through the GameplayMessageSubsystem
+	 * 
+	 * Note:
+	 *	This broadcast is basically only performed by the local proxy
+	 */
+	void BroadcastCooldownMassage(float Duration) const;
+
+protected:
+	void ListenToCooldownEnd(const FGameplayAbilityActorInfo* ActorInfo);
+	void UnlistenToCooldownEnd(const FGameplayAbilityActorInfo* ActorInfo);
+
+private:
+	void HandleAnyGameplayEffectRemoved(const FActiveGameplayEffect& ActiveGameplayEffect);
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "Cooldowns")
+	void OnCooldownEnd();
+	virtual void OnCooldownEnd_Implementation();
+
+#pragma endregion
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// Costs
+#pragma region Costs
+protected:
+	//
+	// Additional costs that must be paid to activate this ability
+	//
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Costs")
+	TArray<TObjectPtr<UAbilityCost>> AdditionalCosts;
+
+protected:
+	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+
+#pragma endregion
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// Activation Failure
+#pragma region Activation Failure
 protected:
 	//
 	// Map of failure tags to simple error messages
 	//
-	UPROPERTY(EditDefaultsOnly, Category = "Advanced")
+	UPROPERTY(EditDefaultsOnly, Category = "Activation Failure")
 	TMap<FGameplayTag, FText> FailureTagToUserFacingMessages;
 
 	//
 	// Map of failure tags to anim montages that should be played with them
 	//
-	UPROPERTY(EditDefaultsOnly, Category = "Advanced")
+	UPROPERTY(EditDefaultsOnly, Category = "Activation Failure")
 	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> FailureTagToAnimMontage;
-
-public:
-	/**
-	 * Runs when this ability is created and try to activate the ability
-	 */
-	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 
 protected:
 	/**
@@ -114,8 +246,19 @@ protected:
 	void OnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const;
 	virtual void OnAbilityFailedToActivate_Implementation(const FGameplayTagContainer& FailedReason) const;
 
+#pragma endregion
 
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// Utilities
+#pragma region Utilities
 public:
+	template<typename T>
+	T* GetTypedSourceObject() const
+	{
+		return Cast<T>(GetCurrentSourceObject());
+	}
+
 	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
 	UAbilitySystemComponent* GetAbilitySystemComponent(TSubclassOf<UAbilitySystemComponent> Class) const;
 
@@ -196,5 +339,7 @@ public:
 	{
 		return Cast<T>(GetActor(T::StaticClass()));
 	}
+
+#pragma endregion
 
 };

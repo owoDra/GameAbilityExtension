@@ -23,3 +23,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Skill					, "Ability.Type.Skill");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Weapon					, "Ability.Type.Weapon");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_StatusChange			, "Ability.Type.StatusChange");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Misc					, "Ability.Type.Misc");
+
+///////////////////////////////////////////////////////
+// Ability.Cooldown
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Cooldown, "Ability.Cooldown");
