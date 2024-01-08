@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #pragma once
 
@@ -56,7 +56,7 @@ public:
  * Mapping of how ability tags block or cancel other abilities 
  */
 UCLASS(BlueprintType, Const)
-class UAbilityTagRelationshipMapping : public UDataAsset
+class GAEXT_API UAbilityTagRelationshipMapping : public UDataAsset
 {
 	GENERATED_BODY()
 public:

@@ -13,6 +13,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsMissing		, "Ability.Activate
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Networking		, "Ability.ActivateFail.Networking");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Cost			, "Ability.ActivateFail.Cost");
 
+
 ///////////////////////////////////////////////////////
 // Ability.Type
 
@@ -24,7 +25,15 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Weapon					, "Ability.Type.Weapon");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_StatusChange			, "Ability.Type.StatusChange");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Misc					, "Ability.Type.Misc");
 
+
 ///////////////////////////////////////////////////////
 // Ability.Cooldown
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Cooldown, "Ability.Cooldown");
+
+
+
+///////////////////////////////////////////////////////
+// Ability.Behavior
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Behavior, "Ability.Behavior");

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 #pragma once
 
@@ -26,6 +26,8 @@ class GAEXT_API UGAEAbilitySystemComponent : public UAbilitySystemComponent, pub
 	GENERATED_BODY()
 public:
 	UGAEAbilitySystemComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//
 	// Function name used to add this component
@@ -74,8 +76,8 @@ protected:
 	// Tips:
 	//	If nullptr, only the tags set in the abilities are referenced.
 	//
-	UPROPERTY(Transient)
-	TObjectPtr<UAbilityTagRelationshipMapping> TagRelationshipMapping;
+	UPROPERTY(Replicated, Transient)
+	TObjectPtr<const UAbilityTagRelationshipMapping> TagRelationshipMapping;
 
 protected:
 	virtual void ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UGameplayAbility* RequestingAbility, bool bEnableBlockTags, const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags) override;
@@ -84,7 +86,8 @@ public:
 	/** 
 	 * Sets the current tag relationship mapping, if null it will clear it out 
 	 */
-	void SetTagRelationshipMapping(UAbilityTagRelationshipMapping* NewMapping);
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category = "Tag Relationship")
+	void SetTagRelationshipMapping(const UAbilityTagRelationshipMapping* NewMapping);
 
 	/** 
 	 * Looks at ability tags and gathers additional required and blocking tags 

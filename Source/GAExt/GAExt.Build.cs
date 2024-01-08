@@ -1,4 +1,4 @@
-// Copyright (C) 2023 owoDra
+﻿// Copyright (C) 2023 owoDra
 
 using UnrealBuildTool;
 
@@ -29,6 +29,7 @@ public class GAExt : ModuleRules
                 "GameplayAbilities",
                 "GameFeatures",
                 "DeveloperSettings",
+                "NetCore",
             }
         );
 

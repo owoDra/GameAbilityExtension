@@ -658,7 +658,7 @@ AController* UGAEGameplayAbility::GetController(TSubclassOf<AController> Class) 
 {
 	if (CurrentActorInfo)
 	{
-		if (auto * PC{ CurrentActorInfo->PlayerController.Get() })
+		if (auto* PC{ CurrentActorInfo->PlayerController.Get() })
 		{
 			return PC;
 		}

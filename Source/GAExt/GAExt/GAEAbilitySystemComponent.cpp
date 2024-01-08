@@ -12,6 +12,8 @@
 #include "InitState/InitStateTags.h"
 #include "InitState/InitStateComponent.h"
 
+#include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Pawn.h"
@@ -27,6 +29,17 @@ const FName UGAEAbilitySystemComponent::NAME_AbilityReady("AbilityReady");
 UGAEAbilitySystemComponent::UGAEAbilitySystemComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+}
+
+void UGAEAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+	Params.Condition = COND_None;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UGAEAbilitySystemComponent, TagRelationshipMapping, Params);
 }
 
 
@@ -309,9 +322,17 @@ void UGAEAbilitySystemComponent::ApplyAbilityBlockAndCancelTags(const FGameplayT
 	Super::ApplyAbilityBlockAndCancelTags(AbilityTags, RequestingAbility, bEnableBlockTags, ModifiedBlockTags, bExecuteCancelTags, ModifiedCancelTags);
 }
 
-void UGAEAbilitySystemComponent::SetTagRelationshipMapping(UAbilityTagRelationshipMapping* NewMapping)
+void UGAEAbilitySystemComponent::SetTagRelationshipMapping(const UAbilityTagRelationshipMapping* NewMapping)
 {
-	TagRelationshipMapping = NewMapping;
+	if (GetOwner()->HasAuthority())
+	{
+		if (TagRelationshipMapping != NewMapping)
+		{
+			TagRelationshipMapping = NewMapping;
+
+			MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, TagRelationshipMapping, this);
+		}
+	}
 }
 
 void UGAEAbilitySystemComponent::GetAdditionalActivationTagRequirements(const FGameplayTagContainer& AbilityTags, FGameplayTagContainer& OutActivationRequired, FGameplayTagContainer& OutActivationBlocked) const
