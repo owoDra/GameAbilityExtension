@@ -31,7 +31,7 @@ GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Misc);
 ///////////////////////////////////////////////////////
 // Ability.Cooldown
 
-GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Cooldown);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Cooldown);
 
 
 ///////////////////////////////////////////////////////

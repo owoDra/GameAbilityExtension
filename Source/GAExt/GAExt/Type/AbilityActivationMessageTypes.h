@@ -4,21 +4,21 @@
 
 #include "GameplayTagContainer.h"
 
-#include "AbilityCooldownMessageTypes.generated.h"
+#include "AbilityActivationMessageTypes.generated.h"
 
 class AActor;
 class UGAEGameplayAbility;
 
 
 /**
- * Data for messages that signal the beginning or end of an ability's cooldown
+ * Data for messages that notify the ability activation
  */
 USTRUCT(BlueprintType)
-struct FAbilityCooldownMessage
+struct FAbilityActivationMessage
 {
 	GENERATED_BODY()
 public:
-	FAbilityCooldownMessage() {}
+	FAbilityActivationMessage() {}
 
 public:
 	UPROPERTY(BlueprintReadWrite)
@@ -32,8 +32,5 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TWeakObjectPtr<UObject> SourceObject{ nullptr };
-
-	UPROPERTY(BlueprintReadWrite)
-	float Duration{ 0.0f };
 
 };

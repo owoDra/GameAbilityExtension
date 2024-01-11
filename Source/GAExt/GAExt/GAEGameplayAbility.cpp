@@ -9,6 +9,7 @@
 #include "GameplayTag/GAETags_Message.h"
 #include "Type/AbilityFailureMessageTypes.h"
 #include "Type/AbilityCooldownMessageTypes.h"
+#include "Type/AbilityActivationMessageTypes.h"
 #include "GAExtLogs.h"
 #include "GAExtStatGroup.h"
 
@@ -98,6 +99,14 @@ void UGAEGameplayAbility::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo
 
 
 #pragma region Ability Activation
+
+void UGAEGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+{
+	BroadcastActivationMassage();
+
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
+
 
 bool UGAEGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
@@ -354,6 +363,30 @@ void UGAEGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorI
 	}
 }
 
+
+void UGAEGameplayAbility::BroadcastActivationMassage() const
+{
+	if (ActivationMessageTag.IsValid())
+	{
+		if (bActivationMessageLocallyOnly)
+		{
+			if (!IsLocallyControlled())
+			{
+				return;
+			}
+		}
+
+		FAbilityActivationMessage Message;
+		Message.Ability = this;
+		Message.OwnerActor = GetOwningActorFromActorInfo();
+		Message.AvatarActor = GetAvatarActorFromActorInfo();
+		Message.SourceObject = GetCurrentSourceObject();
+
+		auto& MessageSubsystem{ UGameplayMessageSubsystem::Get(GetWorld()) };
+		MessageSubsystem.BroadcastMessage(ActivationMessageTag, Message);
+	}
+}
+
 #pragma endregion
 
 
@@ -470,6 +503,7 @@ void UGAEGameplayAbility::BroadcastCooldownMassage(float Duration) const
 		Message.Ability = this;
 		Message.OwnerActor = GetOwningActorFromActorInfo();
 		Message.AvatarActor = GetAvatarActorFromActorInfo();
+		Message.SourceObject = GetCurrentSourceObject();
 		Message.Duration = Duration;
 	
 		auto& MessageSubsystem{ UGameplayMessageSubsystem::Get(GetWorld()) };
@@ -521,6 +555,8 @@ void UGAEGameplayAbility::HandleAnyGameplayEffectRemoved(const FActiveGameplayEf
 
 void UGAEGameplayAbility::OnCooldownEnd_Implementation()
 {
+	BroadcastCooldownMassage(0.0f);
+
 	for (const auto& Cost : AdditionalCosts)
 	{
 		if (Cost)
@@ -528,8 +564,6 @@ void UGAEGameplayAbility::OnCooldownEnd_Implementation()
 			Cost->OnCooldownEnd(this, GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo());
 		}
 	}
-
-	BroadcastCooldownMassage(0.0f);
 }
 
 #pragma endregion

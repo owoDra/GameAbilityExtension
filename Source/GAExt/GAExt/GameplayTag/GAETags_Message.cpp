@@ -14,3 +14,10 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Ability_ActivateFail_PlayMontage			, "Message
 // Message.Ability.Cooldown
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Ability_Cooldown, "Message.Ability.Cooldown");
+
+
+
+////////////////////////////////////
+// Message.Ability.Activation
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Ability_Activation, "Message.Ability.Activation");

@@ -15,4 +15,10 @@ GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Ability_ActivateFail_PlayMo
 ////////////////////////////////////
 // Message.Ability.Cooldown
 
-GAEXT_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Ability_Cooldown);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Ability_Cooldown);
+
+
+////////////////////////////////////
+// Message.Ability.Activation
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Ability_Activation);

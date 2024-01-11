@@ -115,7 +115,27 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Ability Activation")
 	EAbilityActivationPolicy ActivationPolicy{ EAbilityActivationPolicy::Default };
 
+	//
+	// Tag to be used when sending activation messages
+	// 
+	// Tips:
+	//	If not set, no message will be sent
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Ability Activation|Message", meta = (Categories = "Message.Ability.Activation"))
+	FGameplayTag ActivationMessageTag;
+
+	//
+	// Whether to send Activation messages locally only
+	// 
+	// Tips:
+	//	This is useful when you want to notify only locally, for example, when informing the UI, etc. of an execution.
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Ability Activation|Message")
+	bool bActivationMessageLocallyOnly{ true };
+
 public:
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual bool DoesAbilitySatisfyTagRequirements(const UAbilitySystemComponent& AbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const override;
 
@@ -123,6 +143,11 @@ public:
 	 * Runs when this ability is created and try to activate the ability
 	 */
 	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
+
+	/**
+	 * Broadcast the ability activation to the GameplayMessageSubsystem
+	 */
+	void BroadcastActivationMassage() const;
 
 #pragma endregion
 
