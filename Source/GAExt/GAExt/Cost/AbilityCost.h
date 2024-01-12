@@ -61,20 +61,6 @@ public:
 	//
 public:
 	/**
-	 * Executed when ability is added.
-	 *
-	 * Tips:
-	 *	Override this function if necessary to initialize costs, set up listen, etc.
-	 * 
-	 * Note:
- 	 *  Ability is guaranteed to be non-null on entry.
-	 */
-	virtual void OnGiveAbility(
-		const UGAEGameplayAbility* Ability
-		, const FGameplayAbilityActorInfo* ActorInfo
-		, const FGameplayAbilitySpec& Spec) {}
-
-	/**
 	 * Executed when ability is removed.
 	 *
 	 * Tips:
@@ -116,5 +102,15 @@ public:
 		, const FGameplayAbilitySpecHandle Handle
 		, const FGameplayAbilityActorInfo* ActorInfo
 		, const FGameplayAbilityActivationInfo ActivationInfo) {}
+
+
+	//////////////////////////////////////////////////////////////
+	// Utilities
+protected:
+	template<typename T = UGAEGameplayAbility>
+	T* GetOwnerAbility() const
+	{
+		return GetTypedOuter<T>();
+	}
 
 };

@@ -20,7 +20,7 @@ struct FActiveGameplayEffectHandle;
  * Data used by the ability set to grant gameplay ability
  */
 USTRUCT(BlueprintType)
-struct FAbilitySet_GameplayAbility
+struct GAEXT_API FAbilitySet_GameplayAbility
 {
 	GENERATED_BODY()
 public:
@@ -40,7 +40,7 @@ public:
  * Data used by the ability set to grant gameplay effect
  */
 USTRUCT(BlueprintType)
-struct FAbilitySet_GameplayEffect
+struct GAEXT_API FAbilitySet_GameplayEffect
 {
 	GENERATED_BODY()
 public:
@@ -57,7 +57,7 @@ public:
  * Data used by the ability set to grant attribute sets.
  */
 USTRUCT(BlueprintType)
-struct FAbilitySet_AttributeSet
+struct GAEXT_API FAbilitySet_AttributeSet
 {
 	GENERATED_BODY()
 public:
@@ -88,6 +88,10 @@ public:
 	void AddAbilitySpecHandle(const FGameplayAbilitySpecHandle& Handle);
 	void AddGameplayEffectHandle(const FActiveGameplayEffectHandle& Handle);
 	void AddAttributeSet(UAttributeSet* Set);
+
+	void AddAbilities(UAbilitySystemComponent* ASC, const TArray<FAbilitySet_GameplayAbility>& Abilities, UObject* SourceObject = nullptr);
+	void AddGameplayEffects(UAbilitySystemComponent* ASC, const TArray<FAbilitySet_GameplayEffect>& Effects, UObject* SourceObject = nullptr);
+	void AddAttributeSets(UAbilitySystemComponent* ASC, const TArray<FAbilitySet_AttributeSet>& Sets, UObject* SourceObject = nullptr);
 
 	void TakeFromAbilitySystem(UAbilitySystemComponent* ASC);
 

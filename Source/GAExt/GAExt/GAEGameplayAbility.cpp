@@ -50,15 +50,7 @@ void UGAEGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorIn
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
-	ListenToCooldownEnd(ActorInfo);
-
-	for (const auto& Cost : AdditionalCosts)
-	{
-		if (Cost)
-		{
-			Cost->OnGiveAbility(this, ActorInfo, Spec);
-		}
-	}
+	ListenToCooldown(ActorInfo);
 
 	BP_OnGiveAbility();
 
@@ -67,7 +59,7 @@ void UGAEGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorIn
 
 void UGAEGameplayAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	UnlistenToCooldownEnd(ActorInfo);
+	UnlistenToCooldown(ActorInfo);
 
 	for (const auto& Cost : AdditionalCosts)
 	{
@@ -435,10 +427,6 @@ void UGAEGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
 
 			ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, SpecHandle);
 		}
-
-		// Broadcast
-
-		BroadcastCooldownMassage(CooltimeOverride);
 	}
 }
 
@@ -512,45 +500,68 @@ void UGAEGameplayAbility::BroadcastCooldownMassage(float Duration) const
 }
 
 
-void UGAEGameplayAbility::ListenToCooldownEnd(const FGameplayAbilityActorInfo* ActorInfo)
+void UGAEGameplayAbility::ListenToCooldown(const FGameplayAbilityActorInfo* ActorInfo)
 {
-	if (bShouldListenToCooldownEnd)
+	auto ASC{ ActorInfo->AbilitySystemComponent };
+	if (ASC.IsValid())
 	{
-		auto ASC{ ActorInfo->AbilitySystemComponent };
-		if (ASC.IsValid())
+		if (bShouldListenToCooldownStart)
 		{
-			ASC->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &ThisClass::HandleAnyGameplayEffectRemoved);
+			ASC->OnActiveGameplayEffectAddedDelegateToSelf.AddUObject(this, &ThisClass::HandleAnyGameplayEffectAdded);
 		}
 	}
 }
 
-void UGAEGameplayAbility::UnlistenToCooldownEnd(const FGameplayAbilityActorInfo* ActorInfo)
+void UGAEGameplayAbility::UnlistenToCooldown(const FGameplayAbilityActorInfo* ActorInfo)
 {
-	if (bShouldListenToCooldownEnd)
+	auto ASC{ ActorInfo->AbilitySystemComponent };
+	if (ASC.IsValid())
 	{
-		auto ASC{ ActorInfo->AbilitySystemComponent };
-		if (ASC.IsValid())
+		if (bShouldListenToCooldownStart)
 		{
-			ASC->OnAnyGameplayEffectRemovedDelegate().RemoveAll(this);
+			ASC->OnActiveGameplayEffectAddedDelegateToSelf.RemoveAll(this);
+		}
+
+		if (bShouldListenToCooldownEnd)
+		{
+			if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(CooldownGEHandle) })
+			{
+				Delegate->RemoveAll(this);
+			}
 		}
 	}
 }
 
-void UGAEGameplayAbility::HandleAnyGameplayEffectRemoved(const FActiveGameplayEffect& ActiveGameplayEffect)
+
+void UGAEGameplayAbility::HandleAnyGameplayEffectAdded(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle)
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UGAEGameplayAbility::HandleAnyGameplayEffectRemoved()"), STAT_UGAEGameplayAbility_HandleAnyGameplayEffectRemoved, STATGROUP_Ability);
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UGAEGameplayAbility::HandleAnyGameplayEffectAdded()"), STAT_UGAEGameplayAbility_HandleAnyGameplayEffectAdded, STATGROUP_Ability);
 
-	const auto* CooldownTags{ GetCooldownTags() };
-
-	if (CooldownTags && CooldownTags->Num() > 0)
+	if (Spec.DynamicGrantedTags.HasTag(CooldownTag))
 	{
-		const auto Query{ FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(*CooldownTags) };
+		OnCooldownStart(Spec.GetDuration());
 
-		if (Query.Matches(ActiveGameplayEffect))
+		if (bShouldListenToCooldownEnd)
 		{
-			OnCooldownEnd();
+			if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(Handle) })
+			{
+				Delegate->AddUObject(this, &ThisClass::HandleCDGameplayEffectRemoved);
+			}
+
+			CooldownGEHandle = Handle;
 		}
 	}
+}
+
+void UGAEGameplayAbility::HandleCDGameplayEffectRemoved(const FGameplayEffectRemovalInfo& Info)
+{
+	OnCooldownEnd();
+}
+
+
+void UGAEGameplayAbility::OnCooldownStart_Implementation(float Duration)
+{
+	BroadcastCooldownMassage(Duration);
 }
 
 void UGAEGameplayAbility::OnCooldownEnd_Implementation()
@@ -730,6 +741,45 @@ APawn* UGAEGameplayAbility::GetPawn(TSubclassOf<APawn> Class) const
 AActor* UGAEGameplayAbility::GetActor(TSubclassOf<AActor> Class) const
 {
 	return CurrentActorInfo ? CurrentActorInfo->AvatarActor.Get() : nullptr;
+}
+
+APlayerState* UGAEGameplayAbility::GetPlayerState(TSubclassOf<APlayerState> Class) const
+{
+	if (CurrentActorInfo)
+	{
+		if (auto* PS_FromPC{ CurrentActorInfo->PlayerController.IsValid() ? CurrentActorInfo->PlayerController->GetPlayerState<APlayerState>() : nullptr})
+		{
+			return PS_FromPC;
+		}
+
+		if (auto* PS_Avatar{ CurrentActorInfo->AvatarActor.IsValid() ? Cast<APlayerState>(CurrentActorInfo->AvatarActor.Get()) : nullptr })
+		{
+			return PS_Avatar;
+		}
+
+		if (auto* PS_Owner{ CurrentActorInfo->OwnerActor.IsValid() ? Cast<APlayerState>(CurrentActorInfo->OwnerActor.Get()) : nullptr })
+		{
+			return PS_Owner;
+		}
+
+		if (auto* Pawn{ GetPawn() })
+		{
+			if (auto* PS_FromPawn{ Pawn ? Pawn->GetPlayerState() : nullptr })
+			{
+				return PS_FromPawn;
+			}
+
+			if (auto* Controller{ Pawn->GetController() })
+			{
+				if (auto* PS_FromPawnController{ Controller ? Controller->GetPlayerState<APlayerState>() : nullptr })
+				{
+					return PS_FromPawnController;
+				}
+			}
+		}
+	}
+
+	return nullptr;
 }
 
 #pragma endregion

@@ -13,6 +13,7 @@ class AController;
 class ACharacter;
 class APawn;
 class AActor;
+class APlayerState;
 
 /**
  * Types of method that activate or deactivated abilities
@@ -184,14 +185,23 @@ protected:
 	FGameplayTag CooldownMessageTag;
 
 	//
-	// Whether to listen for end of cooldown
+	// Whether to listen for start of cooldown
 	//
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns")
+	bool bShouldListenToCooldownStart{ false };
+
+	//
+	// Whether to listen for end of cooldown
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (EditCondition = "bShouldListenToCooldownStart"))
 	bool bShouldListenToCooldownEnd{ false };
 
 protected:
 	UPROPERTY(Transient)
 	mutable FGameplayTagContainer CooldownGETags;
+
+	UPROPERTY(Transient)
+	FActiveGameplayEffectHandle CooldownGEHandle;
 
 public:
 	virtual bool CommitAbilityCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const bool ForceCooldown, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
@@ -216,13 +226,18 @@ protected:
 	void BroadcastCooldownMassage(float Duration) const;
 
 protected:
-	void ListenToCooldownEnd(const FGameplayAbilityActorInfo* ActorInfo);
-	void UnlistenToCooldownEnd(const FGameplayAbilityActorInfo* ActorInfo);
+	void ListenToCooldown(const FGameplayAbilityActorInfo* ActorInfo);
+	void UnlistenToCooldown(const FGameplayAbilityActorInfo* ActorInfo);
 
 private:
-	void HandleAnyGameplayEffectRemoved(const FActiveGameplayEffect& ActiveGameplayEffect);
+	void HandleAnyGameplayEffectAdded(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle);
+	void HandleCDGameplayEffectRemoved(const FGameplayEffectRemovalInfo& Info);
 
 protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "Cooldowns")
+	void OnCooldownStart(float Duration);
+	virtual void OnCooldownStart_Implementation(float Duration);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Cooldowns")
 	void OnCooldownEnd();
 	virtual void OnCooldownEnd_Implementation();
@@ -363,6 +378,15 @@ public:
 	T* GetActor() const
 	{
 		return Cast<T>(GetActor(T::StaticClass()));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
+	APlayerState* GetPlayerState(TSubclassOf<APlayerState> Class) const;
+
+	template<typename T = APlayerState>
+	T* GetPlayerState() const
+	{
+		return Cast<T>(GetPlayerState(T::StaticClass()));
 	}
 
 #pragma endregion
