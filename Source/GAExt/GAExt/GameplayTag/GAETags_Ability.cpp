@@ -27,13 +27,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Misc					, "Ability.Type.Misc");
 
 
 ///////////////////////////////////////////////////////
-// Ability.Cooldown
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Cooldown, "Ability.Cooldown");
-
-
-
-///////////////////////////////////////////////////////
 // Ability.Behavior
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Behavior, "Ability.Behavior");

@@ -158,6 +158,12 @@ public:
 #pragma region Cooldowns
 protected:
 	//
+	// Whether to use cooldown or not
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns")
+	bool bUseCooldown{ false };
+
+	//
 	// Override the effect time of CooldownGameplayEffect.
 	// 
 	// Note:
@@ -165,15 +171,6 @@ protected:
 	//
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (ClampMin = 0.00))
 	float CooltimeOverride{ 0.0f };
-
-	//
-	// Tag to identify cooldown GE
-	// 
-	// Note:
-	//	If not set, cooldown is not executed
-	//
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (Categories = "Ability.Cooldown"))
-	FGameplayTag CooldownTag;
 
 	//
 	// Tag to be used when sending cooldown messages
@@ -184,32 +181,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (Categories = "Message.Ability.Cooldown"))
 	FGameplayTag CooldownMessageTag;
 
-	//
-	// Whether to listen for start of cooldown
-	//
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns")
-	bool bShouldListenToCooldownStart{ false };
-
-	//
-	// Whether to listen for end of cooldown
-	//
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (EditCondition = "bShouldListenToCooldownStart"))
-	bool bShouldListenToCooldownEnd{ false };
-
 protected:
 	UPROPERTY(Transient)
-	mutable FGameplayTagContainer CooldownGETags;
+	FActiveGameplayEffectHandle CooldownGEHandle;
 
 	UPROPERTY(Transient)
-	FActiveGameplayEffectHandle CooldownGEHandle;
+	bool bCoolingdown{ false };
 
 public:
 	virtual bool CommitAbilityCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const bool ForceCooldown, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
 
 	virtual bool CheckCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
-
-	virtual const FGameplayTagContainer* GetCooldownTags() const override;
 
 protected:
 	/**

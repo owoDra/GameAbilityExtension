@@ -398,7 +398,7 @@ bool UGAEGameplayAbility::CheckCooldown(const FGameplayAbilitySpecHandle Handle,
 {
 	if (IsCooldownAvailable())
 	{
-		return Super::CheckCooldown(Handle, ActorInfo, OptionalRelevantTags);
+		return !bCoolingdown;
 	}
 
 	return true;
@@ -422,7 +422,6 @@ void UGAEGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
 				// Override Spec values
 
 				Spec->SetSetByCallerMagnitude(UGameplayEffect_GenericCooldown::NAME_SetByCaller_Cooldown, CooltimeOverride);
-				Spec->DynamicGrantedTags.AddTag(CooldownTag);
 			}
 
 			ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, SpecHandle);
@@ -431,37 +430,11 @@ void UGAEGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
 }
 
 
-const FGameplayTagContainer* UGAEGameplayAbility::GetCooldownTags() const
-{
-	// If CooldownGETags is valid, return it.
-
-	if (CooldownGETags.IsValid())
-	{
-		return &CooldownGETags;
-	}
-
-	// If CooldownGETags is invalid, cache Tags to CooldownGETags and return CooldownGETags
-
-	if (auto* OriginalTags{ Super::GetCooldownTags() })
-	{
-		CooldownGETags = *OriginalTags;
-
-		if (CooldownTag.IsValid())
-		{
-			CooldownGETags.AddTag(CooldownTag);
-		}
-
-		return &CooldownGETags;
-	}
-	
-	return nullptr;
-}
-
 bool UGAEGameplayAbility::IsCooldownAvailable() const
 {
-	// If CooldownTag not set, return false
+	// If bUseCooldown is false, return false
 
-	if (!CooldownTag.IsValid())
+	if (!bUseCooldown)
 	{
 		return false;
 	}
@@ -502,10 +475,10 @@ void UGAEGameplayAbility::BroadcastCooldownMassage(float Duration) const
 
 void UGAEGameplayAbility::ListenToCooldown(const FGameplayAbilityActorInfo* ActorInfo)
 {
-	auto ASC{ ActorInfo->AbilitySystemComponent };
-	if (ASC.IsValid())
+	if (bUseCooldown)
 	{
-		if (bShouldListenToCooldownStart)
+		auto ASC{ ActorInfo->AbilitySystemComponent };
+		if (ASC.IsValid())
 		{
 			ASC->OnActiveGameplayEffectAddedDelegateToSelf.AddUObject(this, &ThisClass::HandleAnyGameplayEffectAdded);
 		}
@@ -514,16 +487,13 @@ void UGAEGameplayAbility::ListenToCooldown(const FGameplayAbilityActorInfo* Acto
 
 void UGAEGameplayAbility::UnlistenToCooldown(const FGameplayAbilityActorInfo* ActorInfo)
 {
-	auto ASC{ ActorInfo->AbilitySystemComponent };
-	if (ASC.IsValid())
+	if (bUseCooldown)
 	{
-		if (bShouldListenToCooldownStart)
+		auto ASC{ ActorInfo->AbilitySystemComponent };
+		if (ASC.IsValid())
 		{
 			ASC->OnActiveGameplayEffectAddedDelegateToSelf.RemoveAll(this);
-		}
 
-		if (bShouldListenToCooldownEnd)
-		{
 			if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(CooldownGEHandle) })
 			{
 				Delegate->RemoveAll(this);
@@ -537,24 +507,25 @@ void UGAEGameplayAbility::HandleAnyGameplayEffectAdded(UAbilitySystemComponent* 
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UGAEGameplayAbility::HandleAnyGameplayEffectAdded()"), STAT_UGAEGameplayAbility_HandleAnyGameplayEffectAdded, STATGROUP_Ability);
 
-	if (Spec.DynamicGrantedTags.HasTag(CooldownTag))
+	if (Spec.GetContext().GetAbility() == GetClass()->GetDefaultObject())
 	{
 		OnCooldownStart(Spec.GetDuration());
 
-		if (bShouldListenToCooldownEnd)
+		if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(Handle) })
 		{
-			if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(Handle) })
-			{
-				Delegate->AddUObject(this, &ThisClass::HandleCDGameplayEffectRemoved);
-			}
-
-			CooldownGEHandle = Handle;
+			Delegate->AddUObject(this, &ThisClass::HandleCDGameplayEffectRemoved);
 		}
+		
+		CooldownGEHandle = Handle;
+
+		bCoolingdown = true;
 	}
 }
 
 void UGAEGameplayAbility::HandleCDGameplayEffectRemoved(const FGameplayEffectRemovalInfo& Info)
 {
+	bCoolingdown = false;
+
 	OnCooldownEnd();
 }
 
