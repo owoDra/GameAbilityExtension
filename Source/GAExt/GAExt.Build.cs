@@ -20,16 +20,13 @@ public class GAExt : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core",
-                "CoreUObject",
-                "Engine",
-                "ModularGameplay",
-                "GameplayTags",
-                "GameplayTasks",
-                "GameplayAbilities",
-                "GameFeatures",
-                "DeveloperSettings",
-                "NetCore",
+                "Core", "CoreUObject", "Engine",
+
+                "ModularGameplay", "GameplayTags", "GameFeatures",
+
+                "GameplayTasks", "GameplayAbilities",
+
+                "GFCore",
             }
         );
 
@@ -37,7 +34,9 @@ public class GAExt : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "GFCore",
+                "NetCore",
+
+                "DeveloperSettings",
             }
         );
 

@@ -24,9 +24,6 @@ enum class EAbilityActivationMethod : uint8
 	// Activated when input is received
 	OnInputTriggered,	
 
-	// Activated when input is received and deactivated when input is lost
-	WhileInputActive,	
-
 	// Activated when abilities are registered and created
 	OnSpawn,			
 

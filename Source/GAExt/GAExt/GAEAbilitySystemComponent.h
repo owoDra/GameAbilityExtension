@@ -96,22 +96,6 @@ public:
 
 
 protected:
-	//
-	// Handles to abilities that had their input pressed this frame.
-	//
-	TArray<FGameplayAbilitySpecHandle> InputPressedSpecHandles;
-
-	//
-	// Handles to abilities that had their input released this frame.
-	//
-	TArray<FGameplayAbilitySpecHandle> InputReleasedSpecHandles;
-
-	//
-	// Handles to abilities that have their input held.
-	//
-	TArray<FGameplayAbilitySpecHandle> InputHeldSpecHandles;
-
-protected:
 	virtual void AbilitySpecInputPressed(FGameplayAbilitySpec& Spec) override;
 	virtual void AbilitySpecInputReleased(FGameplayAbilitySpec& Spec) override;
 
@@ -125,16 +109,6 @@ public:
 	 * Mark the release and hold end of abilities according to the tag.
 	 */
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
-
-	/**
-	 * Clear marked ability inputs.
-	 */
-	void ClearAbilityInput();
-
-	/**
-	 * Execute the input process for the marked abilities.
-	 */
-	void ProcessAbilityInput(float DeltaTime, bool bGamePaused);
 
 	/**
 	 * Cancel abilities activated by input

@@ -9,10 +9,43 @@
 #include "GameplayEffect.h"
 #include "GameplayAbilitySpec.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AbilitySet)
 
+///////////////////////////////////////////////////////////////
+// FAbilitySet_GameplayAbility
 
-#pragma region GrantedHandles
+bool FAbilitySet_GameplayAbility::IsValid() const
+{
+	return ::IsValid(Ability);
+}
+
+
+///////////////////////////////////////////////////////////////
+// FAbilitySet_GameplayEffect
+
+bool FAbilitySet_GameplayEffect::IsValid() const
+{
+	return ::IsValid(GameplayEffect);
+}
+
+
+///////////////////////////////////////////////////////////////
+// FAbilitySet_AttributeSet
+
+bool FAbilitySet_AttributeSet::IsValid() const
+{
+	return ::IsValid(AttributeSet);
+}
+
+
+///////////////////////////////////////////////////////////////
+// FAbilitySet_GrantedHandles
+
+#pragma region FAbilitySet_GrantedHandles
 
 void FAbilitySet_GrantedHandles::AddAbilitySpecHandle(const FGameplayAbilitySpecHandle& Handle)
 {
@@ -174,12 +207,57 @@ void FAbilitySet_GrantedHandles::TakeFromAbilitySystem(UAbilitySystemComponent* 
 #pragma endregion
 
 
-#pragma region AbilitySet
+///////////////////////////////////////////////////////////////
+// UAbilitySet
+
+#pragma region UAbilitySet
 
 UAbilitySet::UAbilitySet(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
+
+#if WITH_EDITOR 
+EDataValidationResult UAbilitySet::IsDataValid(FDataValidationContext& Context) const
+{
+	auto Result{ CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid) };
+
+	int32 Index{ 0 };
+	for (const auto& Ability : GrantedGameplayAbilities)
+	{
+		if (!Ability.IsValid())
+		{
+			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
+
+			Context.AddError(FText::FromString(FString::Printf(TEXT("Invalid Ability set in GrantedGameplayAbilities[%d] in %s"), Index, *GetNameSafe(this))));
+		}
+	}
+
+	Index = 0;
+	for (const auto& Effect : GrantedGameplayEffects)
+	{
+		if (!Effect.IsValid())
+		{
+			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
+
+			Context.AddError(FText::FromString(FString::Printf(TEXT("Invalid Effect set in GrantedGameplayEffects[%d] in %s"), Index, *GetNameSafe(this))));
+		}
+	}
+
+	Index = 0;
+	for (const auto& Attribute : GrantedAttributes)
+	{
+		if (!Attribute.IsValid())
+		{
+			Result = CombineDataValidationResults(Result, EDataValidationResult::Invalid);
+
+			Context.AddError(FText::FromString(FString::Printf(TEXT("Invalid Attribute set in GrantedAttributes[%d] in %s"), Index, *GetNameSafe(this))));
+		}
+	}
+
+	return Result;
+}
+#endif
 
 
 void UAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject) const
@@ -261,6 +339,11 @@ void UAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_
 			}
 		}
 	}
+}
+
+void UAbilitySet::BP_GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_GrantedHandles& OutGrantedHandles, UObject* SourceObject) const
+{
+	GiveToAbilitySystem(ASC, &OutGrantedHandles, SourceObject);
 }
 
 #pragma endregion

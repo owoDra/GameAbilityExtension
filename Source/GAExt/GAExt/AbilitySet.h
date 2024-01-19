@@ -5,6 +5,7 @@
 #include "Engine/DataAsset.h"
 
 #include "GameplayTagContainer.h"
+#include "GameplayAbilitySpec.h"
 
 #include "AbilitySet.generated.h"
 
@@ -12,7 +13,6 @@ class UGameplayAbility;
 class UGameplayEffect;
 class UAttributeSet;
 class UAbilitySystemComponent;
-struct FGameplayAbilitySpecHandle;
 struct FActiveGameplayEffectHandle;
 
 
@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "Input"))
 	FGameplayTag InputTag;
 
+public:
+	bool IsValid() const;
+
 };
 
 
@@ -50,6 +53,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float EffectLevel{ 1.0f };
 
+public:
+	bool IsValid() const;
+
 };
 
 
@@ -63,6 +69,9 @@ struct GAEXT_API FAbilitySet_AttributeSet
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UAttributeSet> AttributeSet{ nullptr };
+
+public:
+	bool IsValid() const;
 
 };
 
@@ -108,6 +117,10 @@ class GAEXT_API UAbilitySet : public UPrimaryDataAsset
 public:
 	UAbilitySet(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+#if WITH_EDITOR 
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
 protected:
 	//
 	// Gameplay abilities to grant when this ability set is granted.
@@ -133,5 +146,7 @@ public:
 	 * The returned handles can be used later to take away anything that was granted.
 	 */
 	void GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
-
+	
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, BlueprintPure = false, Category = "Abilities", meta = (DisplayName = "GiveToAbilitySystem"))
+	void BP_GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_GrantedHandles& OutGrantedHandles, UObject* SourceObject = nullptr) const;
 };
