@@ -44,14 +44,14 @@ public:
 /**
  * AbilityCost class of the type that consumes the OwningActor or AvatarActor's StatTag
  */
-UCLASS(DefaultToInstanced, EditInlineNew, meta = (DisplayName = "Cost Actor Stat Tag"))
+UCLASS(DefaultToInstanced, EditInlineNew, meta = (DisplayName = "Stat Tag Cost"))
 class GAEXT_API UAbilityCost_StatTag : public UAbilityCost
 {
 	GENERATED_BODY()
 public:
 	UAbilityCost_StatTag(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-protected:
+public:
 	//
 	// Whether the StatTag refers to the OwningActor or the AvatarActor
 	//
