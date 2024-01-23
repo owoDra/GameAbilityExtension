@@ -51,7 +51,7 @@ class GAEXT_API UAbilityCost_StatTag : public UAbilityCost
 public:
 	UAbilityCost_StatTag(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-protected:
+public:
 	//
 	// Whether the StatTag refers to the OwningActor or the AvatarActor
 	//

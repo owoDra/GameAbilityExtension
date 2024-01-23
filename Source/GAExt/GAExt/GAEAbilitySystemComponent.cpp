@@ -8,7 +8,7 @@
 #include "GlobalAbilitySubsystem.h"
 #include "GAExtLogs.h"
 
-#include "Actor/GFCPlayerController.h"
+#include "Player/GFCPlayerController.h"
 #include "InitState/InitStateTags.h"
 #include "InitState/InitStateComponent.h"
 
