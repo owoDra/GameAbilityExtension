@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #pragma once
 
@@ -37,7 +37,7 @@ protected:
 	FTimerHandle TimerRepeatAction;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly, DisplayName = "Repeat With Duration"))
+	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "true", DisplayName = "Repeat With Duration"))
 	static UAbilityTask_RepeatWithDuration* CreateRepeatWithDuration(UGameplayAbility* OwningAbility, float Duration);
 
 	virtual void Activate() override;
