@@ -503,13 +503,29 @@ void UGAEGameplayAbility::UnlistenToCooldown(const FGameplayAbilityActorInfo* Ac
 }
 
 
+bool UGAEGameplayAbility::IsCDGameplayEffectForThis(const FGameplayEffectSpec& Spec) const
+{
+	return (Spec.GetContext().GetAbility() == GetClass()->GetDefaultObject());
+}
+
+
 void UGAEGameplayAbility::HandleAnyGameplayEffectAdded(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UGAEGameplayAbility::HandleAnyGameplayEffectAdded()"), STAT_UGAEGameplayAbility_HandleAnyGameplayEffectAdded, STATGROUP_Ability);
 
-	if (Spec.GetContext().GetAbility() == GetClass()->GetDefaultObject())
+	if (IsCDGameplayEffectForThis(Spec))
 	{
 		OnCooldownStart(Spec.GetDuration());
+
+		if (CooldownGEHandle.IsValid())
+		{
+			if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(Handle) })
+			{
+				Delegate->RemoveAll(this);
+			}
+
+			CooldownGEHandle.Invalidate();
+		}
 
 		if (auto* Delegate{ ASC->OnGameplayEffectRemoved_InfoDelegate(Handle) })
 		{

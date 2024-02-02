@@ -166,7 +166,7 @@ protected:
 	// Note:
 	//	If the class is not the default GameplayEffect class, it may not be available in some settings.
 	//
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (ClampMin = 0.00))
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (ClampMin = 0.00, EditCondition = "bUseCooldown"))
 	float CooltimeOverride{ 0.0f };
 
 	//
@@ -175,7 +175,7 @@ protected:
 	// Tips:
 	//	If not set, no message will be sent
 	//
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (Categories = "Message.Ability.Cooldown"))
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (Categories = "Message.Ability.Cooldown", EditCondition = "bUseCooldown"))
 	FGameplayTag CooldownMessageTag;
 
 protected:
@@ -208,6 +208,11 @@ protected:
 protected:
 	void ListenToCooldown(const FGameplayAbilityActorInfo* ActorInfo);
 	void UnlistenToCooldown(const FGameplayAbilityActorInfo* ActorInfo);
+
+	/**
+	 * Returns whether GameplayEffectSpec is related for this ability
+	 */
+	virtual bool IsCDGameplayEffectForThis(const FGameplayEffectSpec& Spec) const;
 
 private:
 	void HandleAnyGameplayEffectAdded(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& Spec, FActiveGameplayEffectHandle Handle);

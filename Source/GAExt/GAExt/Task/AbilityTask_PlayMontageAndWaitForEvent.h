@@ -102,7 +102,7 @@ public:
 		UGameplayAbility* OwningAbility
 		, FName TaskInstanceName
 		, UAnimMontage* InMontageToPlay
-		, FGameplayTagContainer InEventTags
+		, UPARAM(meta = (Categories = "Event")) FGameplayTagContainer InEventTags
 		, float InRate = 1.0f
 		, FName InStartSection = NAME_None
 		, bool bInStopWhenAbilityEnds = true
