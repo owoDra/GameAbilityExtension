@@ -4,6 +4,8 @@
 
 #include "GAExtLogs.h"
 
+#include "Character/CharacterMeshAccessorInterface.h"
+
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Animation/AnimInstance.h"
@@ -158,7 +160,18 @@ bool UAbilityTask_PlayMontageAndWaitForEvent::PlayMontage()
 
 	if (Duration > 0.0f)
 	{
-		auto* AnimInstance{ Ability->GetCurrentActorInfo() ? Ability->GetCurrentActorInfo()->GetAnimInstance() : nullptr};
+		auto* AnimInstance{ Ability->GetCurrentActorInfo() ? Ability->GetCurrentActorInfo()->GetAnimInstance() : nullptr };
+		if (!AnimInstance)
+		{
+			auto* Actor{ Ability->GetCurrentActorInfo()->AvatarActor.Get() };
+			if (Actor && Actor->Implements<UCharacterMeshAccessorInterface>())
+			{
+				if (auto* MainMesh{ ICharacterMeshAccessorInterface::Execute_GetMainMesh(Actor) })
+				{
+					AnimInstance = MainMesh->GetAnimInstance();
+				}
+			}
+		}
 
 		if (AnimInstance && ShouldBroadcastAbilityTaskDelegates())
 		{
