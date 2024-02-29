@@ -678,12 +678,24 @@ USkeletalMeshComponent* UGAEGameplayAbility::GetSkeletalMeshComponent(TSubclassO
 
 UAnimInstance* UGAEGameplayAbility::GetAnimInstance(TSubclassOf<UAnimInstance> Class) const
 {
-	return CurrentActorInfo ? CurrentActorInfo->AnimInstance.Get() : nullptr;
+	auto* AnimIns{ CurrentActorInfo ? CurrentActorInfo->AnimInstance.Get() : nullptr };
+	if (!AnimIns)
+	{
+		if (auto* Mesh{ GetSkeletalMeshComponent() })
+		{
+			AnimIns = Mesh->GetAnimInstance();
+		}
+	}
+
+	return AnimIns;
 }
 
 APlayerController* UGAEGameplayAbility::GetPlayerController(TSubclassOf<APlayerController> Class) const
 {
-	return CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr;
+	auto* PC{ CurrentActorInfo ? CurrentActorInfo->PlayerController.Get() : nullptr };
+	PC = PC ? PC : GetController<APlayerController>();
+
+	return PC;
 }
 
 AController* UGAEGameplayAbility::GetController(TSubclassOf<AController> Class) const
