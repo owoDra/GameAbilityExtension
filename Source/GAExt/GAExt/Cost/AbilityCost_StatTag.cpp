@@ -84,10 +84,13 @@ void UAbilityCost_StatTag::OnAvatarSet(const UGAEGameplayAbility* Ability, const
 
 				Interface->SetMaxStatTagStack(Cost.StatTag, MaxValue);
 
-				const auto DefaultReal{ Cost.DefaultValue.GetValueAtLevel(AbilityLevel) };
-				const auto DefaultValue{ FMath::TruncToInt(DefaultReal) };
+				if (!Cost.bDoNotInitDefaultValue)
+				{
+					const auto DefaultReal{ Cost.DefaultValue.GetValueAtLevel(AbilityLevel) };
+					const auto DefaultValue{ FMath::TruncToInt(DefaultReal) };
 
-				Interface->SetStatTagStack(Cost.StatTag, DefaultValue);
+					Interface->SetStatTagStack(Cost.StatTag, DefaultValue);
+				}
 			}
 		}
 	}

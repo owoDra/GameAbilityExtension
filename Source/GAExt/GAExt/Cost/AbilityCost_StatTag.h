@@ -32,10 +32,13 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bShouldInitStatTag{ true };
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "bShouldInitStatTag"))
+	bool bDoNotInitDefaultValue{ false };
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "bShouldInitStatTag", EditConditionHides))
 	FScalableFloat MaxValue{ 1.0f };
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "bShouldInitStatTag", EditConditionHides))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "bShouldInitStatTag && !bDoNotInitDefaultValue", EditConditionHides))
 	FScalableFloat DefaultValue{ 1.0f };
 
 };

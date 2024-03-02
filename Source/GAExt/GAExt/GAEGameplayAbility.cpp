@@ -505,7 +505,7 @@ void UGAEGameplayAbility::UnlistenToCooldown(const FGameplayAbilityActorInfo* Ac
 
 bool UGAEGameplayAbility::IsCDGameplayEffectForThis(const FGameplayEffectSpec& Spec) const
 {
-	return (Spec.GetContext().GetAbility() == GetClass()->GetDefaultObject());
+	return (Spec.GetContext().GetAbility() == GetClass()->GetDefaultObject()) && (Spec.Def->IsA<UGameplayEffect_GenericCooldown>());
 }
 
 
