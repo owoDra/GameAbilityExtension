@@ -278,6 +278,9 @@ protected:
 	// Utilities
 #pragma region Utilities
 public:
+	UFUNCTION(BlueprintCallable, Category = "Ability", meta = (DeterminesOutputType = "Class"))
+	UObject* GetSourceObject(TSubclassOf<UObject> Class) const { return GetCurrentSourceObject(); }
+
 	template<typename T>
 	T* GetTypedSourceObject() const
 	{
