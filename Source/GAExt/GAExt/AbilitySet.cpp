@@ -88,7 +88,7 @@ void FAbilitySet_GrantedHandles::AddAbilities(UAbilitySystemComponent* ASC, cons
 
 			if (!AbilityToGrant.Ability)
 			{
-				UE_LOG(LogGAE, Error, TEXT("Direct adding GrantedGameplayAbilities[%d] is not valid."), AbilityIndex);
+				UE_LOG(LogGameExt_Ability, Error, TEXT("Direct adding GrantedGameplayAbilities[%d] is not valid."), AbilityIndex);
 				continue;
 			}
 
@@ -124,7 +124,7 @@ void FAbilitySet_GrantedHandles::AddGameplayEffects(UAbilitySystemComponent* ASC
 
 			if (!EffectToGrant.GameplayEffect)
 			{
-				UE_LOG(LogGAE, Error, TEXT("Direct Adding GrantedGameplayEffects[%d] is not valid"), EffectIndex);
+				UE_LOG(LogGameExt_Ability, Error, TEXT("Direct Adding GrantedGameplayEffects[%d] is not valid"), EffectIndex);
 				continue;
 			}
 
@@ -153,7 +153,7 @@ void FAbilitySet_GrantedHandles::AddAttributeSets(UAbilitySystemComponent* ASC, 
 
 			if (!IsValid(SetToGrant.AttributeSet))
 			{
-				UE_LOG(LogGAE, Error, TEXT("Direct adding GrantedAttributes[%d] is not valid"), SetIndex);
+				UE_LOG(LogGameExt_Ability, Error, TEXT("Direct adding GrantedAttributes[%d] is not valid"), SetIndex);
 				continue;
 			}
 
@@ -279,7 +279,7 @@ void UAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_
 
 			if (!AbilityToGrant.Ability)
 			{
-				UE_LOG(LogGAE, Error, TEXT("GrantedGameplayAbilities[%d] on ability set [%s] is not valid."), AbilityIndex, *GetNameSafe(this));
+				UE_LOG(LogGameExt_Ability, Error, TEXT("GrantedGameplayAbilities[%d] on ability set [%s] is not valid."), AbilityIndex, *GetNameSafe(this));
 				continue;
 			}
 
@@ -305,7 +305,7 @@ void UAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_
 
 			if (!EffectToGrant.GameplayEffect)
 			{
-				UE_LOG(LogGAE, Error, TEXT("GrantedGameplayEffects[%d] on ability set [%s] is not valid"), EffectIndex, *GetNameSafe(this));
+				UE_LOG(LogGameExt_Ability, Error, TEXT("GrantedGameplayEffects[%d] on ability set [%s] is not valid"), EffectIndex, *GetNameSafe(this));
 				continue;
 			}
 
@@ -326,7 +326,7 @@ void UAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_
 
 			if (!IsValid(SetToGrant.AttributeSet))
 			{
-				UE_LOG(LogGAE, Error, TEXT("GrantedAttributes[%d] on ability set [%s] is not valid"), SetIndex, *GetNameSafe(this));
+				UE_LOG(LogGameExt_Ability, Error, TEXT("GrantedAttributes[%d] on ability set [%s] is not valid"), SetIndex, *GetNameSafe(this));
 				continue;
 			}
 

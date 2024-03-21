@@ -183,7 +183,7 @@ bool UAbilityTask_PlayMontageAndWaitForEvent::PlayMontage()
 		}
 		else
 		{
-			UE_LOG(LogGAE, Error, TEXT("Cannot bind montage events(AnimIns: %s, Should: %s)"),
+			UE_LOG(LogGameExt_Ability, Error, TEXT("Cannot bind montage events(AnimIns: %s, Should: %s)"),
 				*GetNameSafe(AnimInstance), ShouldBroadcastAbilityTaskDelegates() ? TEXT("T"): TEXT("F"));
 		}
 

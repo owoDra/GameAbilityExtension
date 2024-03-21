@@ -24,6 +24,9 @@ enum class EAbilityActivationMethod : uint8
 	// Activated when input is received
 	OnInputTriggered,	
 
+	// Always try to activate while inputting
+	WhileInput,
+
 	// Activated when abilities are registered and created
 	OnSpawn,			
 
@@ -166,7 +169,7 @@ protected:
 	// Note:
 	//	If the class is not the default GameplayEffect class, it may not be available in some settings.
 	//
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Cooldowns", meta = (ClampMin = 0.00, EditCondition = "bUseCooldown"))
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Cooldowns", meta = (ClampMin = 0.00, EditCondition = "bUseCooldown"))
 	float CooltimeOverride{ 0.0f };
 
 	//

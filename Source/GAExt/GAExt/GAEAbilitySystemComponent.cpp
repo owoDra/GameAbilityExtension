@@ -99,7 +99,7 @@ void UGAEAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AAct
 	
 	Super::InitAbilityActorInfo(InOwnerActor, InAvatarActor);
 
-	if (InAvatarActor && (InAvatarActor != ActorInfo->AvatarActor))
+	if (InAvatarActor && IsOwnerActorAuthoritative())
 	{
 		// Register with the global system once we actually have a pawn avatar. 
 		// We wait until this time since some globally-applied effects may require an avatar.
@@ -113,6 +113,23 @@ void UGAEAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AAct
 	}
 
 	CheckDefaultInitialization();
+}
+
+bool UGAEAbilitySystemComponent::GetShouldTick() const
+{
+	if (!InputHeldSpecHandles.IsEmpty())
+	{
+		return true;
+	}
+
+	return Super::GetShouldTick();
+}
+
+void UGAEAbilitySystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	ProcessHeldInput();
 }
 
 
@@ -174,7 +191,7 @@ bool UGAEAbilitySystemComponent::CanChangeInitState(UGameFrameworkComponentManag
 
 void UGAEAbilitySystemComponent::HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState)
 {
-	UE_LOG(LogGAE, Log, TEXT("[%s] Ability System Component InitState Reached: %s"),
+	UE_LOG(LogGameExt_Ability, Log, TEXT("[%s] Ability System Component InitState Reached: %s"),
 		GetOwner()->HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"), *DesiredState.GetTagName().ToString());
 
 	/**
@@ -284,7 +301,7 @@ void UGAEAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityFunc 
 					}
 					else
 					{
-						UE_LOG(LogGAE, Error, TEXT("CancelAbilitiesByFunc: Can't cancel ability [%s] because CanBeCanceled is false."), *GetNameSafe(AbilityInstance));
+						UE_LOG(LogGameExt_Ability, Error, TEXT("CancelAbilitiesByFunc: Can't cancel ability [%s] because CanBeCanceled is false."), *GetNameSafe(AbilityInstance));
 					}
 				}
 			}
@@ -300,7 +317,7 @@ void UGAEAbilitySystemComponent::CancelAbilitiesByFunc(TShouldCancelAbilityFunc 
 			}
 			else
 			{
-				UE_LOG(LogGAE, Error, TEXT("CancelAbilitiesByFunc: Can't cancel ability [%s] because CanBeCanceled is false."), *GetNameSafe(AbilityCDO));
+				UE_LOG(LogGameExt_Ability, Error, TEXT("CancelAbilitiesByFunc: Can't cancel ability [%s] because CanBeCanceled is false."), *GetNameSafe(AbilityCDO));
 			}
 		}
 	}
@@ -390,14 +407,18 @@ void UGAEAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Inpu
 
 					AbilitySpecInputPressed(AbilitySpec);
 				}
-				else
+
+				if (auto* GAEAbility{ Cast<UGAEGameplayAbility>(AbilitySpec.Ability) })
 				{
-					if (auto* GAEAbility{ Cast<UGAEGameplayAbility>(AbilitySpec.Ability) })
+					if (GAEAbility->ActivationMethod == EAbilityActivationMethod::OnInputTriggered)
 					{
-						if (GAEAbility->ActivationMethod == EAbilityActivationMethod::OnInputTriggered)
-						{
-							TryActivateAbility(AbilitySpec.Handle);
-						}
+						TryActivateAbility(AbilitySpec.Handle);
+					}
+					else if (GAEAbility->ActivationMethod == EAbilityActivationMethod::WhileInput)
+					{
+						TryActivateAbility(AbilitySpec.Handle);
+
+						InputHeldSpecHandles.AddUnique(AbilitySpec.Handle);
 					}
 				}
 			}
@@ -420,6 +441,28 @@ void UGAEAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& Inp
 					// Ability is active so pass along the input event.
 
 					AbilitySpecInputReleased(AbilitySpec);
+				}
+
+				InputHeldSpecHandles.Remove(AbilitySpec.Handle);
+			}
+		}
+	}
+}
+
+void UGAEAbilitySystemComponent::ProcessHeldInput()
+{
+	for (const auto& SpecHandle : InputHeldSpecHandles)
+	{
+		if (const auto* AbilitySpec{ FindAbilitySpecFromHandle(SpecHandle) })
+		{
+			if (AbilitySpec->Ability && !AbilitySpec->IsActive())
+			{
+				if (auto* GAEAbility{ Cast<UGAEGameplayAbility>(AbilitySpec->Ability) })
+				{
+					if (GAEAbility->ActivationMethod == EAbilityActivationMethod::WhileInput)
+					{
+						TryActivateAbility(AbilitySpec->Handle);
+					}
 				}
 			}
 		}

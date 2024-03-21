@@ -2,4 +2,5 @@
 
 #include "GAExtLogs.h"
 
-DEFINE_LOG_CATEGORY(LogGAE);
+DEFINE_LOG_CATEGORY(LogGameExt_Ability);
+DEFINE_LOG_CATEGORY(LogGameExt_GlobalAbility);

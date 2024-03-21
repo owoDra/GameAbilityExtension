@@ -44,6 +44,9 @@ protected:
 public:
 	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor) override;
 
+	virtual bool GetShouldTick() const override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 public:
 	virtual FName GetFeatureName() const override { return NAME_ActorFeatureName; }
 	virtual bool CanChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) const override;
@@ -96,6 +99,12 @@ public:
 
 
 protected:
+	//
+	// Handles to abilities that have their input held.
+	//
+	TArray<FGameplayAbilitySpecHandle> InputHeldSpecHandles;
+
+protected:
 	virtual void AbilitySpecInputPressed(FGameplayAbilitySpec& Spec) override;
 	virtual void AbilitySpecInputReleased(FGameplayAbilitySpec& Spec) override;
 
@@ -109,6 +118,11 @@ public:
 	 * Mark the release and hold end of abilities according to the tag.
 	 */
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
+
+	/**
+	 * Try activate "WhileInput" activation policy ability
+	 */
+	void ProcessHeldInput();
 
 	/**
 	 * Cancel abilities activated by input

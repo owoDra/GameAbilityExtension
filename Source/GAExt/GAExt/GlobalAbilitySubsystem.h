@@ -1,4 +1,4 @@
-// Copyright (C) 2024 owoDra
+﻿// Copyright (C) 2024 owoDra
 
 #pragma once
 
@@ -60,13 +60,13 @@ public:
 	UGlobalAbilitySubsystem() {}
 
 protected:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TMap<TSubclassOf<UGameplayAbility>, FGlobalAppliedAbilityList> AppliedAbilities;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TMap<TSubclassOf<UGameplayEffect>, FGlobalAppliedEffectList> AppliedEffects;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<TObjectPtr<UAbilitySystemComponent>> RegisteredASCs;
 
 public:
